@@ -12,14 +12,14 @@ function App() {
 
   useEffect(() => {
     dispatch(setUser(user));
-  }, []);
+  }, [dispatch, user]);
 
   return (
     <Routes>
       <Route
         path="/chat"
         element={
-          <PrivateRoute>
+          <PrivateRoute token={user.token}>
             <Chat />
           </PrivateRoute>
         }
