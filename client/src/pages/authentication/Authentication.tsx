@@ -1,5 +1,4 @@
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import HttpsIcon from "@mui/icons-material/Https";
@@ -9,6 +8,12 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
+import { useAuthenticateUserMutation } from "../../services/authApi";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../store/hooks";
+import { setUser } from "../../store/slices/authSlice";
+import ErrorMessages from "../../components/error/ErrorMessages";
 
 const defaultTheme = createTheme();
 interface FormData {
@@ -30,6 +35,9 @@ const schema = yup.object().shape({
 });
 
 export default function SignIn() {
+  const [authenticateUser, { data, isSuccess, isError, error }] = useAuthenticateUserMutation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const {
     control,
     handleSubmit,
@@ -38,8 +46,24 @@ export default function SignIn() {
     resolver: yupResolver(schema),
   });
 
-  // TODO: sent API request here
-  const onSubmit = (data: FormData) => console.log(data);
+  const onSubmit = (data: FormData) => {
+    console.log(data);
+    authenticateUser(data);
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log(data);
+      dispatch(
+        setUser({
+          name: data.user.name,
+          role: data.user.roleId,
+          token: data.access_token,
+        })
+      );
+      navigate("/chat");
+    }
+  }, [isSuccess, navigate, dispatch, data]);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -97,6 +121,7 @@ export default function SignIn() {
                 />
               )}
             />
+            {isError && <ErrorMessages errors={error?.data?.message} />}
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Sign In
             </Button>
