@@ -1,13 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Authentication from "./pages/authentication/Authentication";
-import Home from "./pages/home/Home";
+import Chat from "./pages/chat/Chat";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/chat" element={<Chat />} />
       <Route path="/authentication" element={<Authentication />} />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/authentication" />} />
     </Routes>
   );
 }
