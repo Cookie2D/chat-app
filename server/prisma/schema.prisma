@@ -26,6 +26,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   chat UserOnChat[]
+  messages Message[]
 
   @@index([roleId], map: "User_roleId_fkey")
 }
@@ -33,6 +34,7 @@ model User {
 model Chat {
   id Int @default(autoincrement()) @id
   users UserOnChat[]
+  messages Message[]
 }
 
 model UserOnChat {
@@ -42,4 +44,18 @@ model UserOnChat {
   chatId Int
 
   @@id([userId])
+}
+
+model Message {
+  id Int @default(autoincrement()) @id
+  message String
+
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  chatId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
