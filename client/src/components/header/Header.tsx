@@ -10,16 +10,12 @@ import {
 } from "@mui/material";
 import { useAppSelector } from "../../store/hooks";
 import { selectAuth } from "../../store/slices/authSlice";
-import { useNavigate } from "react-router-dom";
+interface HeaderProps {
+  handleLogout: () => void;
+}
 
-export default function Header() {
+const Header: React.FC<HeaderProps> = ({ handleLogout }) => {
   const user = useAppSelector(selectAuth);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
-  };
 
   return (
     <Paper
@@ -43,4 +39,6 @@ export default function Header() {
       </Box>
     </Paper>
   );
-}
+};
+
+export default Header;
