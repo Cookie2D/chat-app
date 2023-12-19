@@ -6,13 +6,13 @@ import { useEffect } from "react";
 import { setUser } from "./store/slices/authSlice";
 import PrivateRoute from "./components/private-route/PrivateRoute";
 
+const user = JSON.parse(localStorage.getItem("user") || "{}");
 function App() {
   const dispatch = useAppDispatch();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
     dispatch(setUser(user));
-  }, [dispatch, user]);
+  }, [dispatch]);
 
   return (
     <Routes>
