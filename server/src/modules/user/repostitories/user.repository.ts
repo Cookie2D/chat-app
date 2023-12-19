@@ -34,6 +34,14 @@ export class UserRepository {
     });
   }
 
+  async findOneById(id: number): Promise<User> {
+    return await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
   remove(id: number) {
     return this.prismaService.user.delete({ where: { id } });
   }
