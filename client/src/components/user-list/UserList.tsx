@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { Search } from "@mui/icons-material";
+import { BlockOutlined, Search, VolumeOffSharp, VolumeUpSharp } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
 import { selectChatUsers } from "../../store/slices/chatSlice";
 
@@ -34,7 +34,7 @@ export default function UserList() {
       </div>
       <List>
         {chatUsers.map((userData) => (
-          <ListItem button key={userData.user.id}>
+          <ListItem key={userData.user.id}>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: userData.user.color }}>
                 {userData.user.name.charAt(0).toUpperCase()}
@@ -50,6 +50,14 @@ export default function UserList() {
                 </Typography>
               }
             />
+            <IconButton color="primary">
+              <VolumeUpSharp />
+              <VolumeOffSharp />
+            </IconButton>
+
+            <IconButton>
+              <BlockOutlined />
+            </IconButton>
           </ListItem>
         ))}
       </List>
