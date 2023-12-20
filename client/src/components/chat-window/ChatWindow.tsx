@@ -1,8 +1,10 @@
-import { Avatar, Box, Paper, Typography } from "@mui/material";import ChatInput from "../chat-input/ChatInput";
+import { Avatar, Box, Paper, Typography } from "@mui/material";
+import ChatInput from "../chat-input/ChatInput";
 import { useAppSelector } from "../../store/hooks";
 import { selectChatInfo } from "../../store/slices/chatSlice";
 import { Message } from "../../types/chat.types";
 import { SendMessageParams } from "../../types/chat-functions.interface";
+import { selectAuth } from "../../store/slices/authSlice";
 
 interface ChatWindowProps {
   sendMessage: (params: SendMessageParams) => void;
@@ -10,6 +12,7 @@ interface ChatWindowProps {
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
   const { messages } = useAppSelector(selectChatInfo);
+  const user = useAppSelector(selectAuth);
 
   return (
     <Box sx={{ flex: 1 }}>
@@ -31,11 +34,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
             hour: "2-digit",
             minute: "2-digit",
           });
-
+          const isOwner = message.userId === user.id;
           return (
             <Box
               key={message.id}
-              sx={{ display: "flex", marginBottom: "10px", alignItems: "center" }}
+              sx={{
+                display: "flex",
+                marginBottom: "10px",
+                alignItems: "center",
+                justifyContent: isOwner ? "flex-end" : undefined,
+              }}
             >
               <Avatar sx={{ bgcolor: color }}>{name.charAt(0).toUpperCase()}</Avatar>
               <Box sx={{ marginLeft: "10px", display: "flex", flexDirection: "column" }}>

@@ -1,7 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit";import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../index";
 
 export interface AuthState {
+  id: number | null;
   name: string | null;
   role: string | null;
   token: string | null;
@@ -9,6 +11,7 @@ export interface AuthState {
 }
 
 const initialState: AuthState = {
+  id: null,
   name: null,
   role: null,
   token: null,
@@ -23,6 +26,7 @@ export const authSlice = createSlice({
       localStorage.setItem(
         "user",
         JSON.stringify({
+          id: action.payload.id,
           name: action.payload.name,
           role: action.payload.role,
           token: action.payload.token,
@@ -30,6 +34,7 @@ export const authSlice = createSlice({
         })
       );
 
+      state.id = action.payload.id;
       state.name = action.payload.name;
       state.role = action.payload.role;
       state.token = action.payload.token;

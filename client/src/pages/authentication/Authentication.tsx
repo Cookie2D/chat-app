@@ -1,4 +1,5 @@
-import Avatar from "@mui/material/Avatar";import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import HttpsIcon from "@mui/icons-material/Https";
@@ -54,6 +55,7 @@ export default function SignIn() {
     if (isSuccess) {
       dispatch(
         setUser({
+          id: data.user.id,
           name: data.user.name,
           role: data.user.roleId,
           token: data.access_token,
