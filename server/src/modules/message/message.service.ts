@@ -5,11 +5,7 @@ import { Injectable } from '@nestjs/common';
 export class MessageService {
   constructor(private readonly messageRepository: MessageRepository) {}
 
-  createMessage() {
-    this.messageRepository.createOneMessage({
-      message: '',
-      userId: 1,
-      chatId: 2,
-    });
+  createMessage(message: string, userId: number, chatId: number) {
+    return this.messageRepository.createOneMessage(message, userId, chatId);
   }
 }

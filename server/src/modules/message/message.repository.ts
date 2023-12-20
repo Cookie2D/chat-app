@@ -5,9 +5,25 @@ import { Message } from '@prisma/client';
 @Injectable()
 export class MessageRepository {
   constructor(private readonly prismaService: PrismaService) {}
-  async createOneMessage(data: any): Promise<Message> {
+  async createOneMessage(
+    message: string,
+    userId: number,
+    chatId: number,
+  ): Promise<Message> {
     return await this.prismaService.message.create({
-      data,
+      data: {
+        message,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        chat: {
+          connect: {
+            id: chatId,
+          },
+        },
+      },
     });
   }
 

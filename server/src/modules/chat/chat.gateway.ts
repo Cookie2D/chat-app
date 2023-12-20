@@ -1,3 +1,4 @@
+import { MessageService } from './../message/message.service';
 import { ChatService } from './chat.service';
 import { UserService } from './../user/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -38,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -101,12 +103,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     };
   }
 
-  @SubscribeMessage('newMessage')
-  onNewMessage(@MessageBody() body: any) {
-    this.server.emit('onMessage', {
-      msg: 'New message',
-      content: body,
-    });
+  @SubscribeMessage('sendMessage')
+  async onNewMessage(@MessageBody() body: any, client: Socket) {
+    const user = await this.authenticateUser(body.token);
+
+    if (!user) {
+      this.handleAuthenticationFailure(client);
+      return;
+    }
+    const message = await this.messageService.createMessage(
+      body.message,
+      user.id,
+      body.chatId,
+    );
+
+    this.emitNewMessage(message);
   }
 
   private async authenticateUser(token: string): Promise<User | null> {
@@ -155,5 +166,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private emitGetChatInfo(chatInfo: ChatInfoResponse) {
     this.server.emit('getChatInfo', chatInfo);
+  }
+
+  private emitNewMessage(message: Message) {
+    this.server.emit('newMessage', message);
   }
 }
