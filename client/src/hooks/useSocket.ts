@@ -1,4 +1,5 @@
-import { io, Socket } from "socket.io-client";import { selectAuth } from "../store/slices/authSlice";
+import { io, Socket } from "socket.io-client";
+import { selectAuth } from "../store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

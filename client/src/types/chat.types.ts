@@ -2,22 +2,17 @@ export interface Message {
   id: number;
   message: string;
   userId: number;
+  user: {
+    name: string;
+    color: string;
+  };
   chatId: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface UserOnChat {
-  userId: number;
-  chatId: number;
-  color: string;
-  user: {
-    name: string;
-  };
-}
-
 export interface ChatInfo {
   chatId: number | null;
-  users: UserOnChat[];
+  // users: UserOnChat[];
   messages: Message[];
 }

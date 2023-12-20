@@ -2,7 +2,6 @@ import { PrismaService } from 'src/core/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Chat } from '@prisma/client';
 import { ChatWithRelations } from 'src/types/chat.type';
-import { getRandomColor } from 'src/utils/getRandomColor';
 
 @Injectable()
 export class ChatRepository {
@@ -32,7 +31,20 @@ export class ChatRepository {
             },
           },
         },
-        messages: true,
+        messages: {
+          take: 20,
+          orderBy: {
+            createdAt: 'desc',
+          },
+          include: {
+            user: {
+              select: {
+                name: true,
+                color: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -52,7 +64,6 @@ export class ChatRepository {
       data: {
         userId,
         chatId,
-        color: getRandomColor(),
       },
     });
 
@@ -71,7 +82,20 @@ export class ChatRepository {
             },
           },
         },
-        messages: true,
+        messages: {
+          take: 20,
+          orderBy: {
+            createdAt: 'desc',
+          },
+          include: {
+            user: {
+              select: {
+                name: true,
+                color: true,
+              },
+            },
+          },
+        },
       },
     });
 

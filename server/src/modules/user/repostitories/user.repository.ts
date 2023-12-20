@@ -2,6 +2,7 @@ import { PrismaService } from './../../../core/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { Roles } from 'src/const/roles/roles';
+import { getRandomColor } from 'src/utils/getRandomColor';
 
 @Injectable()
 export class UserRepository {
@@ -13,6 +14,7 @@ export class UserRepository {
     return await this.prismaService.user.create({
       data: {
         ...data,
+        color: getRandomColor(),
         role: {
           connect: {
             name: role,

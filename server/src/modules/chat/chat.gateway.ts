@@ -10,7 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Message, User, UserOnChat } from '@prisma/client';
+import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { BadGatewayException } from '@nestjs/common';
 
@@ -22,7 +22,7 @@ interface OnlineUser {
 interface ChatInfoResponse {
   chatId: number;
   // users: User;
-  users: UserOnChat[];
+  // users: UserOnChat[];
   messages: Message[];
 }
 
@@ -89,8 +89,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return {
         chatId: connectedChat.id,
-        users: connectedChat.users,
-        messages: [],
+        // users: connectedChat.users,
+        messages: connectedChat.messages.reverse(),
       };
     }
 
@@ -98,12 +98,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       chat.id,
       userId,
     );
-    console.log(connectedChat.users);
+    // console.log(connectedChat.users);
 
     return {
       chatId: connectedChat?.id,
-      users: connectedChat.users,
-      messages: connectedChat.messages,
+      // users: connectedChat.users,
+      messages: connectedChat.messages.reverse(),
     };
   }
 

@@ -10,7 +10,7 @@ interface ChatWindowProps {
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
-  const { messages, users } = useAppSelector(selectChatInfo);
+  const { messages } = useAppSelector(selectChatInfo);
 
   return (
     <Box sx={{ flex: 1 }}>
@@ -26,13 +26,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
 
       <Paper elevation={3} sx={{ minHeight: "400px", padding: "20px", overflowY: "auto" }}>
         {messages.map((message: Message) => {
-          const userOnChat = users.find((user) => user.userId === message.userId);
-
-          if (!userOnChat) {
-            return null;
-          }
-
-          const { color, user } = userOnChat;
+          const { color, name } = message.user;
 
           const timestamp = new Date(message.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
@@ -44,10 +38,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
               key={message.id}
               sx={{ display: "flex", marginBottom: "10px", alignItems: "center" }}
             >
-              <Avatar sx={{ bgcolor: color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
+              <Avatar sx={{ bgcolor: color }}>{name.charAt(0).toUpperCase()}</Avatar>
               <Box sx={{ marginLeft: "10px", display: "flex", flexDirection: "column" }}>
                 <Typography variant="subtitle1" color="textSecondary">
-                  {`${user.name} • ${timestamp}`}
+                  {`${name} • ${timestamp}`}
                 </Typography>
                 <Typography color={color} variant="body1">
                   {message.message}

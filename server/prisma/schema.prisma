@@ -27,6 +27,7 @@ model User {
   updatedAt DateTime @updatedAt
   chat UserOnChat[]
   messages Message[]
+  color String?
 
   @@index([roleId], map: "User_roleId_fkey")
 }
@@ -42,8 +43,6 @@ model UserOnChat {
   userId Int
   chat Chat @relation(fields: [chatId], references: [id])
   chatId Int
-
-  color String?
 
   @@id([userId])
 }
