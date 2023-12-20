@@ -1,3 +1,4 @@
+import { excludeFromObject } from 'src/utils/exclude';
 import { MessageService } from './../message/message.service';
 import { ChatService } from './chat.service';
 import { UserService } from './../user/user.service';
@@ -17,6 +18,7 @@ import { BadGatewayException } from '@nestjs/common';
 interface OnlineUser {
   user: User;
   socketId: string;
+  status: string;
 }
 
 interface ChatInfoResponse {
@@ -36,6 +38,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   private onlineUsers: OnlineUser[] = [];
+  private allUsers: OnlineUser[] = [];
+  private admins: string[] = [];
 
   constructor(
     private readonly jwtService: JwtService,
@@ -59,8 +63,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.onlineUsers.push({
         user,
         socketId: client.id,
+        status: 'Online',
       });
 
+      await this.getAllUsers();
+      if (user.roleId === 1) {
+        this.admins.push(client.id);
+      }
       this.emitOnlineUsers();
 
       const chatInfo = await this.getChatInfo(user?.id);
@@ -70,11 +79,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     this.onlineUsers = this.onlineUsers.filter(
       (onlineUser) => onlineUser.socketId !== client.id,
     );
+    this.admins = this.admins.filter((socket) => socket !== client.id);
+    await this.getAllUsers();
+
     this.emitOnlineUsers();
+  }
+
+  async getAllUsers() {
+    const onlineUsers = this.onlineUsers;
+    const allUsers = await this.userService.findAll();
+    const formattedUser: OnlineUser[] = allUsers.map((user) => {
+      const online = onlineUsers.find((oUser) => oUser.user.id === user.id);
+      if (online) {
+        return online;
+      }
+      return {
+        user: {
+          ...excludeFromObject(user, 'password'),
+        },
+        socketId: null,
+        status: 'Offline',
+      };
+    });
+
+    this.allUsers = formattedUser;
   }
 
   async getChatInfo(userId: number): Promise<ChatInfoResponse> {
@@ -191,6 +223,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private emitOnlineUsers() {
     this.server.emit('getOnlineUsers', this.onlineUsers);
+    this.onlineUsers.forEach((onlineUser) => {
+      if (this.admins.some((socket) => socket === onlineUser.socketId)) {
+        return;
+      }
+
+      this.server
+        .to(onlineUser.socketId)
+        .emit('getOnlineUsers', this.onlineUsers);
+    });
+
+    if (this.admins.length) {
+      this.admins.forEach((socketId) => {
+        this.server.to(socketId).emit('getOnlineUsers', this.allUsers);
+      });
+    }
   }
 
   private emitGetChatInfo(chatInfo: ChatInfoResponse) {

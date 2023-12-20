@@ -7,4 +7,5 @@ export interface User {
 export interface UserFromSocket {
   user: User;
   socketId: string;
+  status: string;
 }

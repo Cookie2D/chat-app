@@ -44,7 +44,11 @@ export default function UserList() {
               primary={
                 <Typography sx={{ color: userData.user.color }}>{userData.user.name}</Typography>
               }
-              secondary="Online"
+              secondary={
+                <Typography sx={{ color: userData.status === "Online" ? "green" : "red" }}>
+                  {userData.status}
+                </Typography>
+              }
             />
           </ListItem>
         ))}
