@@ -44,6 +44,9 @@ model UserOnChat {
   chat Chat @relation(fields: [chatId], references: [id])
   chatId Int
 
+  muted Boolean @default(false)
+  banned Boolean @default(false) 
+
   @@id([userId])
 }
 
