@@ -57,6 +57,7 @@ export default function SignIn() {
           name: data.user.name,
           role: data.user.roleId,
           token: data.access_token,
+          color: data.user.color,
         })
       );
       navigate("/chat");

@@ -7,6 +7,7 @@ import {
   ListItemAvatar,
   Avatar,
   ListItemText,
+  Typography,
 } from "@mui/material";
 
 import { Search } from "@mui/icons-material";
@@ -35,9 +36,16 @@ export default function UserList() {
         {chatUsers.map((userData) => (
           <ListItem button key={userData.user.id}>
             <ListItemAvatar>
-              <Avatar alt="User 1" src="/path/to/avatar1.jpg" />
+              <Avatar sx={{ bgcolor: userData.user.color }}>
+                {userData.user.name.charAt(0).toUpperCase()}
+              </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={userData.user.name} secondary="Online" />
+            <ListItemText
+              primary={
+                <Typography sx={{ color: userData.user.color }}>{userData.user.name}</Typography>
+              }
+              secondary="Online"
+            />
           </ListItem>
         ))}
       </List>

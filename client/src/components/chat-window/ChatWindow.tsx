@@ -1,5 +1,4 @@
-import { Avatar, Box, Paper, Typography } from "@mui/material";
-import ChatInput from "../chat-input/ChatInput";
+import { Avatar, Box, Paper, Typography } from "@mui/material";import ChatInput from "../chat-input/ChatInput";
 import { useAppSelector } from "../../store/hooks";
 import { selectChatInfo } from "../../store/slices/chatSlice";
 import { Message } from "../../types/chat.types";
@@ -40,10 +39,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
             >
               <Avatar sx={{ bgcolor: color }}>{name.charAt(0).toUpperCase()}</Avatar>
               <Box sx={{ marginLeft: "10px", display: "flex", flexDirection: "column" }}>
-                <Typography variant="subtitle1" color="textSecondary">
-                  {`${name} • ${timestamp}`}
+                <Typography variant="subtitle1" color={color}>
+                  {`${name} `}
+                  <Typography component="span" color="textSecondary">
+                    • {timestamp}
+                  </Typography>
                 </Typography>
-                <Typography color={color} variant="body1">
+                <Typography variant="body1" color="textSecondary">
                   {message.message}
                 </Typography>
               </Box>

@@ -5,12 +5,14 @@ export interface AuthState {
   name: string | null;
   role: string | null;
   token: string | null;
+  color: string | null;
 }
 
 const initialState: AuthState = {
   name: null,
   role: null,
   token: null,
+  color: null,
 };
 
 export const authSlice = createSlice({
@@ -24,12 +26,14 @@ export const authSlice = createSlice({
           name: action.payload.name,
           role: action.payload.role,
           token: action.payload.token,
+          color: action.payload.color,
         })
       );
 
       state.name = action.payload.name;
       state.role = action.payload.role;
       state.token = action.payload.token;
+      state.color = action.payload.color;
     },
   },
 });

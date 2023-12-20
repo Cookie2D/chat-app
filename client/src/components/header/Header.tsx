@@ -7,6 +7,7 @@ import {
   ListItemText,
   Box,
   IconButton,
+  Typography,
 } from "@mui/material";
 import { useAppSelector } from "../../store/hooks";
 import { selectAuth } from "../../store/slices/authSlice";
@@ -28,9 +29,12 @@ const Header: React.FC<HeaderProps> = ({ handleLogout }) => {
     >
       <ListItem style={{ flex: 1 }}>
         <ListItemAvatar style={{ marginRight: "16px" }}>
-          <Avatar alt="User 2" src="/path/to/avatar2.jpg" />
+          <Avatar sx={{ bgcolor: user.color }}>{user.name?.charAt(0).toUpperCase()}</Avatar>{" "}
         </ListItemAvatar>
-        <ListItemText primary={user.name} secondary="Offline" />
+        <ListItemText
+          primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
+          secondary="Online"
+        />
       </ListItem>
       <Box style={{ marginLeft: "auto" }}>
         <IconButton onClick={handleLogout}>
