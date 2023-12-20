@@ -5,6 +5,7 @@ import { selectChatInfo } from "../../store/slices/chatSlice";
 import { Message } from "../../types/chat.types";
 import { SendMessageParams } from "../../types/chat-functions.interface";
 import { selectAuth } from "../../store/slices/authSlice";
+import { useRef, useEffect } from "react";
 
 interface ChatWindowProps {
   sendMessage: (params: SendMessageParams) => void;
@@ -13,6 +14,15 @@ interface ChatWindowProps {
 const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
   const { messages } = useAppSelector(selectChatInfo);
   const user = useAppSelector(selectAuth);
+
+  const paperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to the bottom of the chat window when messages change
+    if (paperRef.current) {
+      paperRef.current.scrollTop = paperRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   return (
     <Box sx={{ flex: 1 }}>
@@ -26,7 +36,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
         <Typography variant="h5">Chat</Typography>
       </Box>
 
-      <Paper elevation={3} sx={{ minHeight: "400px", padding: "20px", overflowY: "auto" }}>
+      <Paper
+        ref={paperRef}
+        elevation={3}
+        sx={{ minHeight: "400px", padding: "20px", overflowY: "auto", height: "60vh" }}
+      >
         {messages.map((message: Message) => {
           const { color, name } = message.user;
 
