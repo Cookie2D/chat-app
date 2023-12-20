@@ -1,3 +1,4 @@
+import { ChatService } from './chat.service';
 import { UserService } from './../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -8,12 +9,18 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { User } from '@prisma/client';
+import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 
 interface OnlineUser {
   user: User;
   socketId: string;
+}
+
+interface ChatInfoResponse {
+  chatId: number;
+  // users: User;
+  messages: Message[];
 }
 
 @WebSocketGateway({
@@ -30,6 +37,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly chatService: ChatService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -50,6 +58,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
 
       this.emitOnlineUsers();
+
+      const chatInfo = await this.getChatInfo(user?.id);
+      this.emitGetChatInfo(chatInfo);
     } catch (error) {
       this.handleConnectionError(client, error);
     }
@@ -60,6 +71,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       (onlineUser) => onlineUser.socketId !== client.id,
     );
     this.emitOnlineUsers();
+  }
+
+  async getChatInfo(userId: number): Promise<ChatInfoResponse> {
+    const chat = await this.chatService.getChatInfo();
+
+    if (!chat) {
+      const newChat = await this.chatService.createChat();
+      const connectedChat = await this.chatService.appendChatUser(
+        newChat.id,
+        userId,
+      );
+
+      return {
+        chatId: connectedChat.id,
+        messages: [],
+      };
+    }
+
+    const connectedChat = await this.chatService.appendChatUser(
+      chat.id,
+      userId,
+    );
+
+    return {
+      chatId: connectedChat?.id,
+      // users: [],
+      messages: connectedChat.messages,
+    };
   }
 
   @SubscribeMessage('newMessage')
@@ -112,5 +151,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private emitOnlineUsers() {
     this.server.emit('getOnlineUsers', this.onlineUsers);
+  }
+
+  private emitGetChatInfo(chatInfo: ChatInfoResponse) {
+    this.server.emit('getChatInfo', chatInfo);
   }
 }
