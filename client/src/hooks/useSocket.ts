@@ -1,11 +1,11 @@
-import { io, Socket } from "socket.io-client";
-import { selectAuth } from "../store/slices/authSlice";
+import { io, Socket } from "socket.io-client";import { selectAuth } from "../store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserFromSocket } from "../types/user.types";
-import { setChatInfo, setUsers } from "../store/slices/chatSlice";
-import { ChatInfo } from "../types/chat.types";
+import { appendNewMessage, setChatInfo, setUsers } from "../store/slices/chatSlice";
+import { ChatInfo, Message } from "../types/chat.types";
+import { SendMessageParams } from "../types/chat-functions.interface";
 
 const useSocket = () => {
   const user = useAppSelector(selectAuth);
@@ -36,11 +36,20 @@ const useSocket = () => {
     navigate("/");
   };
 
+  const sendMessage = (message: SendMessageParams) => {
+    socket?.emit("sendMessage", message);
+  };
+
+  const addNewMessageToChat = (message: Message) => {
+    dispatch(appendNewMessage(message));
+  };
+
   const uploadChatInfo = () => {
     if (socket) {
       socket.on("getChatInfo", getChatInfo);
       socket.on("getOnlineUsers", getOnlineUsers);
       socket.on("disconnect", handleLogout);
+      socket.on("newMessage", addNewMessageToChat);
     }
   };
 
@@ -56,6 +65,7 @@ const useSocket = () => {
 
   return {
     handleLogout,
+    sendMessage,
   };
 };
 

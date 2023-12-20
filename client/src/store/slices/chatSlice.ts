@@ -1,7 +1,8 @@
-import { createSlice } from "@reduxjs/toolkit";import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../index";
 import { UserFromSocket } from "../../types/user.types";
-import { ChatInfo } from "../../types/chat.types";
+import { ChatInfo, Message } from "../../types/chat.types";
 
 interface ChatState {
   users: UserFromSocket[];
@@ -26,10 +27,13 @@ export const chatSlice = createSlice({
     setChatInfo: (state, action: PayloadAction<ChatInfo>) => {
       state.chatInfo = action.payload;
     },
+    appendNewMessage: (state, action: PayloadAction<Message>) => {
+      state.chatInfo.messages = [...state.chatInfo.messages, action.payload];
+    },
   },
 });
 
 export const selectChatUsers = (state: RootState): UserFromSocket[] => state.chat.users;
 export const selectChatInfo = (state: RootState): ChatInfo => state.chat.chatInfo;
-export const { setUsers, setChatInfo } = chatSlice.actions;
+export const { setUsers, setChatInfo, appendNewMessage } = chatSlice.actions;
 export default chatSlice.reducer;

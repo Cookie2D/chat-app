@@ -1,10 +1,14 @@
-import { Box, Paper, Typography } from "@mui/material";
-import ChatInput from "../chat-input/ChatInput";
+import { Box, Paper, Typography } from "@mui/material";import ChatInput from "../chat-input/ChatInput";
 import { useAppSelector } from "../../store/hooks";
 import { selectChatInfo } from "../../store/slices/chatSlice";
 import { Message } from "../../types/chat.types";
+import { SendMessageParams } from "../../types/chat-functions.interface";
 
-export default function ChatWindow() {
+interface ChatWindowProps {
+  sendMessage: (params: SendMessageParams) => void;
+}
+
+const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
   const { messages } = useAppSelector(selectChatInfo);
 
   return (
@@ -19,7 +23,9 @@ export default function ChatWindow() {
         })}
       </Paper>
 
-      <ChatInput />
+      <ChatInput sendMessage={sendMessage} />
     </Box>
   );
-}
+};
+
+export default ChatWindow;

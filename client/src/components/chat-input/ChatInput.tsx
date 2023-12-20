@@ -1,15 +1,33 @@
-import { Send } from "@mui/icons-material";import { InputBase, InputAdornment, IconButton, Paper } from "@mui/material";
+import { Send } from "@mui/icons-material";
+import { InputBase, InputAdornment, IconButton, Paper } from "@mui/material";
 import React, { useState } from "react";
+import { useAppSelector } from "../../store/hooks";
+import { selectAuth } from "../../store/slices/authSlice";
+import { selectChatInfo } from "../../store/slices/chatSlice";
+import { SendMessageParams } from "../../types/chat-functions.interface";
 
-export default function ChatInput() {
+interface ChatInputProps {
+  sendMessage: (params: SendMessageParams) => void;
+}
+
+const ChatInput: React.FC<ChatInputProps> = ({ sendMessage }) => {
   const [message, setMessage] = useState("");
+  const user = useAppSelector(selectAuth);
+  const { chatId } = useAppSelector(selectChatInfo);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      handleSend();
+    }
+  };
+
   const handleSend = () => {
-    console.log(message);
+    sendMessage({ message, token: user.token, chatId });
+    setMessage("");
   };
 
   return (
@@ -25,10 +43,10 @@ export default function ChatInput() {
     >
       <InputBase
         fullWidth
-        multiline
         placeholder="Type your message..."
         value={message}
         onChange={handleMessageChange}
+        onKeyDown={handleKeyPress}
         sx={{ flexGrow: 1 }}
         endAdornment={
           <InputAdornment position="end">
@@ -40,4 +58,6 @@ export default function ChatInput() {
       />
     </Paper>
   );
-}
+};
+
+export default ChatInput;
