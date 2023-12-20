@@ -1,5 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../index";
 import { UserFromSocket } from "../../types/user.types";
 import { ChatInfo, Message } from "../../types/chat.types";
@@ -14,6 +13,7 @@ const initialState: ChatState = {
   chatInfo: {
     chatId: null,
     messages: [],
+    users: [],
   },
 };
 

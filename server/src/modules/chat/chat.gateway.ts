@@ -10,7 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Message, User } from '@prisma/client';
+import { Message, User, UserOnChat } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { BadGatewayException } from '@nestjs/common';
 
@@ -22,6 +22,7 @@ interface OnlineUser {
 interface ChatInfoResponse {
   chatId: number;
   // users: User;
+  users: UserOnChat[];
   messages: Message[];
 }
 
@@ -88,6 +89,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return {
         chatId: connectedChat.id,
+        users: connectedChat.users,
         messages: [],
       };
     }
@@ -96,10 +98,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       chat.id,
       userId,
     );
+    console.log(connectedChat.users);
 
     return {
       chatId: connectedChat?.id,
-      // users: [],
+      users: connectedChat.users,
       messages: connectedChat.messages,
     };
   }
@@ -126,7 +129,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const lastMessage = await this.messageService.getLastMessageByUser(user.id);
-    console.log(Date.now() - new Date(lastMessage.createdAt).getTime());
+
     if (
       lastMessage &&
       Date.now() - new Date(lastMessage.createdAt).getTime() < 15000

@@ -4,13 +4,9 @@ export type ChatWithRelations = Chat & {
   users: {
     userId: number;
     chatId: number;
+    color: string;
     user: {
-      id: number;
-      email: string | null;
       name: string;
-      roleId: number;
-      createdAt: Date;
-      updatedAt: Date;
     };
   }[];
   messages: {
