@@ -24,6 +24,14 @@ export class MessageRepository {
           },
         },
       },
+      include: {
+        user: {
+          select: {
+            name: true,
+            color: true,
+          },
+        },
+      },
     });
   }
 
