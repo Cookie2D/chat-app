@@ -36,4 +36,17 @@ export class MessageRepository {
       },
     });
   }
+
+  async getLastMessageByUser(userId: number): Promise<Message> {
+    return await this.prismaService.message.findFirst({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }

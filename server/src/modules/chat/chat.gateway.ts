@@ -12,6 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
+import { BadGatewayException } from '@nestjs/common';
 
 interface OnlineUser {
   user: User;
@@ -111,6 +112,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.handleAuthenticationFailure(client);
       return;
     }
+
+    const trimmedMessage = body.message.trim();
+
+    if (!trimmedMessage) {
+      return;
+    }
+
+    if (trimmedMessage.length > 200) {
+      throw new BadGatewayException(
+        'Message should be no longer than 200 symbols',
+      );
+    }
+
+    const lastMessage = await this.messageService.getLastMessageByUser(user.id);
+    console.log(Date.now() - new Date(lastMessage.createdAt).getTime());
+    if (
+      lastMessage &&
+      Date.now() - new Date(lastMessage.createdAt).getTime() < 15000
+    ) {
+      throw new BadGatewayException(
+        'Flood resistant: You can send a message once every 15 seconds.',
+      );
+      return;
+    }
+
     const message = await this.messageService.createMessage(
       body.message,
       user.id,
