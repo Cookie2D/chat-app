@@ -31,7 +31,15 @@ const UserList: React.FC<UserListProps> = ({ muteUser, banUser }) => {
   );
 
   return (
-    <div style={{ width: "30%", marginRight: "20px", maxHeight: "75vh", overflowY: "auto" }}>
+    <div
+      style={{
+        width: "30%",
+        marginRight: "20px",
+        maxHeight: "75vh",
+        overflowY: "auto",
+        overflowX: "hidden",
+      }}
+    >
       <h3>Users</h3>
       <div style={{ marginBottom: "10px" }}>
         <InputBase

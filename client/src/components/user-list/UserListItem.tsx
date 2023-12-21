@@ -24,7 +24,7 @@ interface UserListItemProps {
 const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, muteUser }) => {
   const authUser = useAppSelector(selectAuth);
   const showButtons = authUser.role === 1 && authUser.id !== user.id;
-  const isSmallScreen = useMediaQuery("(max-width: 800px)");
+  const isSmallScreen = useMediaQuery("(max-width: 900px)");
 
   return (
     <Box
@@ -49,6 +49,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
       {showButtons && (
         <>
           <IconButton
+            size="small"
             color={user.muted ? "error" : "primary"}
             onClick={() => {
               muteUser(user.id);
@@ -57,6 +58,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
             {user.muted ? <VolumeOffSharp /> : <VolumeUpSharp />}
           </IconButton>
           <IconButton
+            size="small"
             color={user.banned ? "error" : "primary"}
             onClick={() => {
               banUser(user.id);
