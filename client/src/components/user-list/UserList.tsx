@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { InputBase, InputAdornment, IconButton, List } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
@@ -20,12 +20,23 @@ const UserList: React.FC<UserListProps> = ({ muteUser, banUser }) => {
     (user) => authUser.role === 1 && !onlineUsers.find((onlineUser) => onlineUser.id === user.id)
   );
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredOnlineUsers = onlineUsers.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredOfflineUsers = offlineUsers.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div style={{ width: "30%", marginRight: "20px" }}>
+    <div style={{ width: "30%", marginRight: "20px", maxHeight: "75vh", overflowY: "auto" }}>
       <h3>Users</h3>
       <div style={{ marginBottom: "10px" }}>
         <InputBase
           placeholder="Search users..."
+          onChange={(e) => setSearchQuery(e.target.value)}
           startAdornment={
             <InputAdornment position="start">
               <IconButton size="small">
@@ -36,7 +47,7 @@ const UserList: React.FC<UserListProps> = ({ muteUser, banUser }) => {
         />
       </div>
       <List>
-        {onlineUsers.map((user) => (
+        {filteredOnlineUsers.map((user) => (
           <UserListItem
             key={user.id}
             muteUser={muteUser}
@@ -47,7 +58,7 @@ const UserList: React.FC<UserListProps> = ({ muteUser, banUser }) => {
         ))}
 
         {authUser.role === 1 &&
-          offlineUsers.map((user) => (
+          filteredOfflineUsers.map((user) => (
             <UserListItem
               key={user.id}
               muteUser={muteUser}
