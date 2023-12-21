@@ -172,6 +172,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return false;
       });
 
+    for (const connection of onlineConnections) {
+      if (!connection.data.user) continue;
+
+      connection.emit('getOnlineUsers', onlineUsers);
+
+      if (connection.data.user.roleId === 1) {
+        const allUsers = await this.userService.findAll();
+        connection.emit('getAllUsers', allUsers);
+      }
+    }
+
     this.server.emit('getOnlineUsers', onlineUsers);
   }
 

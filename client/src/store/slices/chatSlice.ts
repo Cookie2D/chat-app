@@ -5,11 +5,13 @@ import { User } from "../../types/user.types";
 import { ChatInfo, Message } from "../../types/chat.types";
 
 interface ChatState {
+  onlineUsers: User[];
   users: User[];
   chatInfo: ChatInfo;
 }
 
 const initialState: ChatState = {
+  onlineUsers: [],
   users: [],
   chatInfo: {
     chatId: null,
@@ -21,6 +23,9 @@ export const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
+    setOnlineUsers: (state, action: PayloadAction<User[]>) => {
+      state.onlineUsers = action.payload;
+    },
     setUsers: (state, action: PayloadAction<User[]>) => {
       state.users = action.payload;
     },
@@ -33,7 +38,8 @@ export const chatSlice = createSlice({
   },
 });
 
-export const selectChatUsers = (state: RootState): User[] => state.chat.users;
+export const selectUsers = (state: RootState): User[] => state.chat.users;
+export const selectOnlineUsers = (state: RootState): User[] => state.chat.onlineUsers;
 export const selectChatInfo = (state: RootState): ChatInfo => state.chat.chatInfo;
-export const { setUsers, setChatInfo, appendNewMessage } = chatSlice.actions;
+export const { setOnlineUsers, setUsers, setChatInfo, appendNewMessage } = chatSlice.actions;
 export default chatSlice.reducer;

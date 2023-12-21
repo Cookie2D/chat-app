@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "../types/user.types";
-import { appendNewMessage, setChatInfo, setUsers } from "../store/slices/chatSlice";
+import { appendNewMessage, setChatInfo, setOnlineUsers, setUsers } from "../store/slices/chatSlice";
 import { ChatInfo, Message } from "../types/chat.types";
 import { SendMessageParams } from "../types/chat-functions.interface";
 
@@ -28,6 +28,10 @@ const useSocket = () => {
   };
 
   const getOnlineUsers = (res: User[]) => {
+    dispatch(setOnlineUsers(res));
+  };
+
+  const getAllUsers = (res: User[]) => {
     dispatch(setUsers(res));
   };
 
@@ -48,6 +52,7 @@ const useSocket = () => {
   const uploadChatInfo = () => {
     if (socket) {
       socket.on("getChatInfo", getChatInfo);
+      socket.on("getAllUsers", getAllUsers);
       socket.on("getOnlineUsers", getOnlineUsers);
       socket.on("disconnect", handleLogout);
       socket.on("newMessage", addNewMessageToChat);
