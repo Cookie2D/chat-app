@@ -1,12 +1,15 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function PrivateRoute({
+export default function ProtectedRoute({
   token,
-  children,
+  redirectPath = "/authentication",
 }: {
-  token: string;
-  children: JSX.Element;
+  token: string | null | boolean;
+  redirectPath: string;
 }) {
-  // const { token } = useSelector(selectAuth);
-  return token ? children : <Navigate to="/authentication" />;
+  if (!token) {
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  return <Outlet />;
 }

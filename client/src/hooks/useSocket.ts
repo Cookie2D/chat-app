@@ -34,7 +34,7 @@ const useSocket = () => {
   const handleLogout = () => {
     socket?.disconnect();
     localStorage.removeItem("user");
-    navigate("/");
+    navigate("/autentication");
   };
 
   const sendMessage = (message: SendMessageParams) => {

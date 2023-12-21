@@ -1,29 +1,28 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Authentication from "./pages/authentication/Authentication";
 import Chat from "./pages/chat/Chat";
-import { useAppDispatch } from "./store/hooks";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { useEffect } from "react";
-import { setUser } from "./store/slices/authSlice";
-import PrivateRoute from "./components/private-route/PrivateRoute";
+import { selectAuth, setUser } from "./store/slices/authSlice";
+import ProtectedRoute from "./components/private-route/PrivateRoute";
 
-const user = JSON.parse(localStorage.getItem("user") || "{}");
 function App() {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(selectAuth);
 
   useEffect(() => {
-    dispatch(setUser(user));
-  }, [dispatch]);
+    if (!user.token) {
+      const localstorageUser = JSON.parse(localStorage.getItem("user") || "{}");
+      dispatch(setUser(localstorageUser));
+    }
+  }, [dispatch, user]);
 
   return (
     <Routes>
-      <Route
-        path="/chat"
-        element={
-          <PrivateRoute token={user.token}>
-            <Chat />
-          </PrivateRoute>
-        }
-      />
+      <Route element={<ProtectedRoute token={user.token} redirectPath="authentication" />}>
+        <Route path="chat" element={<Chat />} />
+      </Route>
+
       <Route path="/authentication" element={<Authentication />} />
       <Route path="*" element={<Navigate to="/authentication" />} />
     </Routes>
