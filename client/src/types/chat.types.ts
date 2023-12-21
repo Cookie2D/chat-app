@@ -13,6 +13,5 @@ export interface Message {
 
 export interface ChatInfo {
   chatId: number | null;
-  // users: UserOnChat[];
   messages: Message[];
 }

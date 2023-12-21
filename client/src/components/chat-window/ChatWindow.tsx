@@ -18,7 +18,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ sendMessage }) => {
   const paperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll to the bottom of the chat window when messages change
     if (paperRef.current) {
       paperRef.current.scrollTop = paperRef.current.scrollHeight;
     }

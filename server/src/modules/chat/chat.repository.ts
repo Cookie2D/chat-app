@@ -59,7 +59,6 @@ export class ChatRepository {
       return existingChat;
     }
 
-    // Explicitly create UserOnChat record
     await this.prismaService.userOnChat.create({
       data: {
         userId,
@@ -67,7 +66,6 @@ export class ChatRepository {
       },
     });
 
-    // Fetch the updated chat with users
     const updatedChat = await this.prismaService.chat.findUnique({
       where: {
         id: chatId,
