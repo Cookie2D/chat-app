@@ -181,10 +181,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       muted: !user.muted,
     });
 
+    const connectedSockets = await this.server.fetchSockets();
+    for (const connected of connectedSockets) {
+      if (connected.data.user?.id === user.id) {
+        connected.data.user.muted = !user.muted;
+      }
+    }
+
     await this.emitGetAllUsers(client);
+    await this.emitOnlineUsers();
   }
 
-  private async authenticateUser(token: string): Promise<User | null> {
+  private async authenticateUser(token: string): Promise<Partial<User> | null> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
@@ -197,7 +205,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private async handleExistingUser(client: Socket, user: User) {
+  private async handleExistingUser(client: Socket, user: Partial<User>) {
     const connectedSockets = await this.server.fetchSockets();
     for (const connected of connectedSockets) {
       if (connected.data.user?.id === user.id && client.id !== connected.id) {
