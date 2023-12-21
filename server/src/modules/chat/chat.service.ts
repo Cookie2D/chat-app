@@ -11,8 +11,12 @@ export class ChatService {
     return this.chatRepository.createOneChat();
   }
 
-  appendChatUser(chatId: number, userId: number): Promise<ChatWithRelations> {
-    return this.chatRepository.appendChatUser(chatId, userId);
+  appendChatUser(
+    chatId: number,
+    userId: number,
+    messageLimit: number = 20,
+  ): Promise<ChatWithRelations> {
+    return this.chatRepository.appendChatUser(chatId, userId, messageLimit);
   }
 
   getChatInfo(): Promise<Chat> {

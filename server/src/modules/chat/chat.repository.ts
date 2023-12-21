@@ -16,6 +16,7 @@ export class ChatRepository {
   async appendChatUser(
     chatId: number,
     userId: number,
+    messageLimit: number = 20,
   ): Promise<ChatWithRelations> {
     const existingChat = await this.prismaService.chat.findUnique({
       where: {
@@ -32,7 +33,7 @@ export class ChatRepository {
           },
         },
         messages: {
-          take: 20,
+          take: messageLimit,
           orderBy: {
             createdAt: 'desc',
           },
@@ -81,7 +82,7 @@ export class ChatRepository {
           },
         },
         messages: {
-          take: 20,
+          take: messageLimit,
           orderBy: {
             createdAt: 'desc',
           },
