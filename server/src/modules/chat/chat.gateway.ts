@@ -1,9 +1,9 @@
-import { excludeFromObject } from 'src/utils/exclude';
 import { MessageService } from './../message/message.service';
 import { ChatService } from './chat.service';
 import { UserService } from './../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -15,16 +15,8 @@ import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { BadGatewayException } from '@nestjs/common';
 
-interface OnlineUser {
-  user: User;
-  socketId: string;
-  status: string;
-}
-
 interface ChatInfoResponse {
   chatId: number;
-  // users: User;
-  // users: UserOnChat[];
   messages: Message[];
 }
 
@@ -36,10 +28,6 @@ interface ChatInfoResponse {
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
-
-  private onlineUsers: OnlineUser[] = [];
-  private allUsers: OnlineUser[] = [];
-  private admins: string[] = [];
 
   constructor(
     private readonly jwtService: JwtService,
@@ -54,22 +42,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.authenticateUser(token);
 
       if (!user) {
-        this.handleAuthenticationFailure(client);
+        client.disconnect(true);
         return;
       }
-
       this.handleExistingUser(client, user);
 
-      this.onlineUsers.push({
-        user,
-        socketId: client.id,
-        status: 'Online',
-      });
-
-      await this.getAllUsers();
-      if (user.roleId === 1) {
-        this.admins.push(client.id);
-      }
+      client.data.user = user;
       this.emitOnlineUsers();
 
       const chatInfo = await this.getChatInfo(user?.id);
@@ -80,33 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket) {
-    this.onlineUsers = this.onlineUsers.filter(
-      (onlineUser) => onlineUser.socketId !== client.id,
-    );
-    this.admins = this.admins.filter((socket) => socket !== client.id);
-    await this.getAllUsers();
-
     this.emitOnlineUsers();
-  }
-
-  async getAllUsers() {
-    const onlineUsers = this.onlineUsers;
-    const allUsers = await this.userService.findAll();
-    const formattedUser: OnlineUser[] = allUsers.map((user) => {
-      const online = onlineUsers.find((oUser) => oUser.user.id === user.id);
-      if (online) {
-        return online;
-      }
-      return {
-        user: {
-          ...excludeFromObject(user, 'password'),
-        },
-        socketId: null,
-        status: 'Offline',
-      };
-    });
-
-    this.allUsers = formattedUser;
   }
 
   async getChatInfo(userId: number): Promise<ChatInfoResponse> {
@@ -140,12 +92,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('sendMessage')
-  async onNewMessage(@MessageBody() body: any, client: Socket) {
-    const user = await this.authenticateUser(body.token);
-
-    if (!user) {
-      this.handleAuthenticationFailure(client);
-      return;
+  async onNewMessage(
+    @MessageBody() body: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (body.message.length > 200) {
+      throw new BadGatewayException(
+        'Message should be no longer than 200 symbols',
+      );
     }
 
     const trimmedMessage = body.message.trim();
@@ -154,13 +108,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    if (trimmedMessage.length > 200) {
-      throw new BadGatewayException(
-        'Message should be no longer than 200 symbols',
-      );
-    }
-
-    const lastMessage = await this.messageService.getLastMessageByUser(user.id);
+    const lastMessage = await this.messageService.getLastMessageByUser(
+      client.data.user.id,
+    );
 
     if (
       lastMessage &&
@@ -169,12 +119,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throw new BadGatewayException(
         'Flood resistant: You can send a message once every 15 seconds.',
       );
-      return;
     }
 
     const message = await this.messageService.createMessage(
       body.message,
-      user.id,
+      client.data.user.id,
       body.chatId,
     );
 
@@ -194,50 +143,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private handleAuthenticationFailure(client: Socket) {
-    client.disconnect(true);
-    console.log('User authentication failed. Disconnecting.');
-  }
-
-  private handleExistingUser(client: Socket, user: User) {
-    const existingUser = this.onlineUsers.find(
-      (onlineUser) => onlineUser.user.id === user.id,
-    );
-
-    if (existingUser) {
-      this.disconnectExistingUser(existingUser.socketId);
+  private async handleExistingUser(client: Socket, user: User) {
+    const connectedSockets = await this.server.fetchSockets();
+    for (const connected of connectedSockets) {
+      if (connected.data.user?.id === user.id && client.id !== connected.id) {
+        connected.disconnect(true);
+      }
     }
-  }
-
-  private disconnectExistingUser(socketId: string) {
-    this.server.sockets.sockets.get(socketId)?.disconnect();
-    this.onlineUsers = this.onlineUsers.filter(
-      (onlineUser) => onlineUser.socketId !== socketId,
-    );
   }
 
   private handleConnectionError(client: Socket, error: any) {
-    console.error('Error during user connection:', error);
+    console.error('Error during user connection:', error); // TODO: replace with logger
     client.disconnect(true);
   }
 
-  private emitOnlineUsers() {
-    this.server.emit('getOnlineUsers', this.onlineUsers);
-    this.onlineUsers.forEach((onlineUser) => {
-      if (this.admins.some((socket) => socket === onlineUser.socketId)) {
-        return;
-      }
+  private async emitOnlineUsers() {
+    const onlineUsersSet = new Set();
 
-      this.server
-        .to(onlineUser.socketId)
-        .emit('getOnlineUsers', this.onlineUsers);
-    });
+    const onlineConnections = await this.server.fetchSockets();
 
-    if (this.admins.length) {
-      this.admins.forEach((socketId) => {
-        this.server.to(socketId).emit('getOnlineUsers', this.allUsers);
+    const onlineUsers = onlineConnections
+      .map((connection) => connection.data.user)
+      .filter((user) => {
+        if (user && !onlineUsersSet.has(user.id)) {
+          onlineUsersSet.add(user.id);
+          return true;
+        }
+        return false;
       });
-    }
+
+    this.server.emit('getOnlineUsers', onlineUsers);
   }
 
   private emitGetChatInfo(chatInfo: ChatInfoResponse) {

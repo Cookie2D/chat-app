@@ -33,33 +33,29 @@ export default function UserList() {
         />
       </div>
       <List>
-        {chatUsers.map((userData) => (
-          <ListItem key={userData.user.id}>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: userData.user.color }}>
-                {userData.user.name.charAt(0).toUpperCase()}
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography sx={{ color: userData.user.color }}>{userData.user.name}</Typography>
-              }
-              secondary={
-                <Typography sx={{ color: userData.status === "Online" ? "green" : "red" }}>
-                  {userData.status}
-                </Typography>
-              }
-            />
-            <IconButton color="primary">
-              <VolumeUpSharp />
-              <VolumeOffSharp />
-            </IconButton>
+        {chatUsers.map((user) => {
+          if (!user) return;
 
-            <IconButton>
-              <BlockOutlined />
-            </IconButton>
-          </ListItem>
-        ))}
+          return (
+            <ListItem key={user.id}>
+              <ListItemAvatar>
+                <Avatar sx={{ bgcolor: user.color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
+                secondary={<Typography sx={{ color: "green" }}>Online</Typography>}
+              />
+              <IconButton>
+                <VolumeUpSharp />
+                {/* <VolumeOffSharp /> */}
+              </IconButton>
+
+              <IconButton>
+                <BlockOutlined />
+              </IconButton>
+            </ListItem>
+          );
+        })}
       </List>
     </div>
   );

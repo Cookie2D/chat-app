@@ -3,7 +3,7 @@ import { selectAuth } from "../store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserFromSocket } from "../types/user.types";
+import { User } from "../types/user.types";
 import { appendNewMessage, setChatInfo, setUsers } from "../store/slices/chatSlice";
 import { ChatInfo, Message } from "../types/chat.types";
 import { SendMessageParams } from "../types/chat-functions.interface";
@@ -27,7 +27,7 @@ const useSocket = () => {
     dispatch(setChatInfo(res));
   };
 
-  const getOnlineUsers = (res: UserFromSocket[]) => {
+  const getOnlineUsers = (res: User[]) => {
     dispatch(setUsers(res));
   };
 
@@ -59,8 +59,7 @@ const useSocket = () => {
     uploadChatInfo();
 
     return () => {
-      socket?.off("getOnlineUsers", uploadChatInfo);
-      socket?.off("disconnect", handleLogout);
+      socket?.disconnect();
     };
   }, [socket, user.token]);
 
