@@ -8,12 +8,17 @@ import Container from "@mui/material/Container";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
-import { useAuthenticateUserMutation } from "../../services/authApi";
+import {
+  useAuthenticateUserMutation,
+  useGoogleAuthenticateUserMutation,
+} from "../../services/authApi";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../store/hooks";
 import { setUser } from "../../store/slices/authSlice";
 import ErrorMessages from "../../components/error/ErrorMessages";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { IconButton } from "@mui/material";
 interface FormData {
   name: string;
   password: string;
@@ -34,6 +39,10 @@ const schema = yup.object().shape({
 
 export default function SignIn() {
   const [authenticateUser, { data, isSuccess, isError, error }] = useAuthenticateUserMutation();
+  const [
+    authenticateGoogle,
+    { data: googleData, isSuccess: isGoogleSuccess, isError: isGoogleError, error: errorGoogle },
+  ] = useGoogleAuthenticateUserMutation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
@@ -46,6 +55,12 @@ export default function SignIn() {
 
   const onSubmit = (data: FormData) => {
     authenticateUser(data);
+  };
+
+  const handleGoogleSubmit = (res: CredentialResponse) => {
+    authenticateGoogle({
+      token: res.credential,
+    });
   };
 
   useEffect(() => {
@@ -64,6 +79,23 @@ export default function SignIn() {
     );
     navigate("/chat");
   }, [isSuccess, navigate, dispatch, data]);
+
+  useEffect(() => {
+    if (!isGoogleSuccess) {
+      return;
+    }
+
+    dispatch(
+      setUser({
+        id: googleData.user.id,
+        name: googleData.user.name,
+        role: googleData.user.roleId,
+        token: googleData.access_token,
+        color: googleData.user.color,
+      })
+    );
+    navigate("/chat");
+  }, [isGoogleSuccess, navigate, dispatch, googleData]);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -121,10 +153,16 @@ export default function SignIn() {
             )}
           />
           {isError && <ErrorMessages errors={error?.data?.message} />}
+          {isGoogleError && <ErrorMessages errors={errorGoogle?.data?.message} />}
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Sign In
           </Button>
         </Box>
+      </Box>
+      <Box sx={{ textAlign: "center" }}>
+        <IconButton>
+          <GoogleLogin type="icon" onSuccess={handleGoogleSubmit} />
+        </IconButton>
       </Box>
     </Container>
   );
