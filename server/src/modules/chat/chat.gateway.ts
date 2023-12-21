@@ -39,7 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const token = String(client.handshake.query.token);
       const user = await this.authenticateUser(token);
 
-      if (!user) {
+      if (!user || user.banned) {
         client.disconnect(true);
         return;
       }
@@ -125,6 +125,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.emitNewMessage(message);
   }
 
+  @SubscribeMessage('banUser')
+  async banUser(
+    @MessageBody() userId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (client.data.user.roleId !== 1) {
+      throw new BadGatewayException('Invalid permissions');
+    }
+
+    if (client.data.user.id === userId) {
+      throw new BadGatewayException('Cannot perform this action');
+    }
+
+    const user = await this.userService.findOneById(userId);
+
+    const updatedUser = await this.userService.updateOne(userId, {
+      banned: !user.banned,
+    });
+
+    if (updatedUser.banned) {
+      const connectedSockets = await this.server.fetchSockets();
+      for (const connected of connectedSockets) {
+        if (connected.data.user?.id === updatedUser.id) {
+          connected.disconnect(true);
+        }
+      }
+    }
+
+    this.emitGetAllUsers(client);
+  }
   private async authenticateUser(token: string): Promise<User | null> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -173,12 +203,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       connection.emit('getOnlineUsers', onlineUsers);
 
       if (connection.data.user.roleId === 1) {
-        const allUsers = await this.userService.findAll();
-        connection.emit('getAllUsers', allUsers);
+        this.emitGetAllUsers(connection);
       }
     }
 
     this.server.emit('getOnlineUsers', onlineUsers);
+  }
+
+  private async emitGetAllUsers(connection: any) {
+    const allUsers = await this.userService.findAll();
+    connection.emit('getAllUsers', allUsers);
   }
 
   private emitGetChatInfo(chatInfo: ChatInfoResponse) {

@@ -1,7 +1,7 @@
 import { UserRepository } from './repostitories/user.repository';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { excludeFromObject } from 'src/utils/exclude';
 
 @Injectable()
@@ -11,7 +11,11 @@ export class UserService {
     return this.userRepository.create(createUserDto);
   }
 
-  findAll(): Promise<User[]> {
+  updateOne(userId: number, user: Prisma.UserUpdateInput): Promise<User> {
+    return this.userRepository.updateOne(userId, user);
+  }
+
+  findAll(): Promise<Partial<User>[]> {
     return this.userRepository.findAll();
   }
 

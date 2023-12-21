@@ -24,8 +24,29 @@ export class UserRepository {
     });
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.prismaService.user.findMany();
+  async findAll(): Promise<Partial<User>[]> {
+    return await this.prismaService.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roleId: true,
+        createdAt: true,
+        updatedAt: true,
+        color: true,
+        muted: true,
+        banned: true,
+      },
+    });
+  }
+
+  async updateOne(id: number, user: Prisma.UserUpdateInput): Promise<User> {
+    return await this.prismaService.user.update({
+      where: {
+        id,
+      },
+      data: user,
+    });
   }
 
   async findOneByName(name: string): Promise<User> {

@@ -10,13 +10,10 @@ import {
 import { BlockOutlined, VolumeUpSharp } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
 import { selectAuth } from "../../store/slices/authSlice";
+import { User } from "../../types/user.types";
 
 interface UserListItemProps {
-  user: {
-    id: number;
-    name: string;
-    color: string;
-  };
+  user: User;
   status: string;
   muteUser: (userId: number) => void;
   banUser: (userId: number) => void;
@@ -40,6 +37,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
       {showButtons && (
         <>
           <IconButton
+            color={user.muted ? "error" : "primary"}
             onClick={() => {
               muteUser(user.id);
             }}
@@ -47,6 +45,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
             <VolumeUpSharp />
           </IconButton>
           <IconButton
+            color={user.banned ? "error" : "primary"}
             onClick={() => {
               banUser(user.id);
             }}
