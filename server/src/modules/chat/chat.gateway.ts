@@ -9,10 +9,10 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
-import { BadGatewayException } from '@nestjs/common';
 
 interface ChatInfoResponse {
   chatId: number;
@@ -94,13 +94,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = await this.userService.findOneById(client.data.user.id);
 
     if (user.muted) {
-      throw new BadGatewayException('You have been muted by the administrator');
+      throw new WsException('You have been muted by the administrator');
     }
 
     if (body.message.length > 200) {
-      throw new BadGatewayException(
-        'Message should be no longer than 200 symbols',
-      );
+      throw new WsException('Message should be no longer than 200 symbols');
     }
 
     const trimmedMessage = body.message.trim();
@@ -117,7 +115,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       lastMessage &&
       Date.now() - new Date(lastMessage.createdAt).getTime() < 15000
     ) {
-      throw new BadGatewayException(
+      throw new WsException(
         'Flood resistant: You can send a message once every 15 seconds.',
       );
     }
@@ -137,11 +135,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     if (client.data.user.roleId !== 1) {
-      throw new BadGatewayException('Invalid permissions');
+      throw new WsException('Invalid permissions');
     }
 
     if (client.data.user.id === userId) {
-      throw new BadGatewayException('Cannot perform this action');
+      throw new WsException('Cannot perform this action');
     }
 
     const user = await this.userService.findOneById(userId);
@@ -168,11 +166,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     if (client.data.user.roleId !== 1) {
-      throw new BadGatewayException('Invalid permissions');
+      throw new WsException('Invalid permissions');
     }
 
     if (client.data.user.id === userId) {
-      throw new BadGatewayException('Cannot perform this action');
+      throw new WsException('Cannot perform this action');
     }
 
     const user = await this.userService.findOneById(userId);

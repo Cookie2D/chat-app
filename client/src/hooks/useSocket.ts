@@ -7,6 +7,7 @@ import { User } from "../types/user.types";
 import { appendNewMessage, setChatInfo, setOnlineUsers, setUsers } from "../store/slices/chatSlice";
 import { ChatInfo, Message } from "../types/chat.types";
 import { SendMessageParams } from "../types/chat-functions.interface";
+import { toast } from "react-toastify";
 
 const useSocket = () => {
   const user = useAppSelector(selectAuth);
@@ -57,6 +58,12 @@ const useSocket = () => {
     dispatch(appendNewMessage(message));
   };
 
+  const toggleError = (error: Error) => {
+    toast(error.message, {
+      type: "error",
+    });
+  };
+
   const uploadChatInfo = () => {
     if (socket) {
       socket.on("getChatInfo", getChatInfo);
@@ -64,6 +71,7 @@ const useSocket = () => {
       socket.on("getOnlineUsers", getOnlineUsers);
       socket.on("disconnect", handleLogout);
       socket.on("newMessage", addNewMessageToChat);
+      socket.on("exception", toggleError);
     }
   };
 
