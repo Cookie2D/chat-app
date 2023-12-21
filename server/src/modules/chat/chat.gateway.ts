@@ -13,6 +13,7 @@ import {
 } from '@nestjs/websockets';
 import { Message, User } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
 
 interface ChatInfoResponse {
   chatId: number;
@@ -190,7 +191,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return await this.userService.findOneById(payload?.sub);
     } catch (error) {
-      console.error('User authentication error:', error);
+      Logger.error('User authentication error:', error);
       return null;
     }
   }
@@ -205,7 +206,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private handleConnectionError(client: Socket, error: any) {
-    console.error('Error during user connection:', error); // TODO: replace with logger
+    Logger.error('Error during user connection:', error); // TODO: replace with logger
     client.disconnect(true);
   }
 
