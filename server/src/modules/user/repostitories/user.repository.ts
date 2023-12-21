@@ -57,10 +57,21 @@ export class UserRepository {
     });
   }
 
-  async findOneById(id: number): Promise<User> {
+  async findOneById(id: number): Promise<Omit<User, 'password'>> {
     return await this.prismaService.user.findUnique({
       where: {
         id,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roleId: true,
+        createdAt: true,
+        updatedAt: true,
+        color: true,
+        muted: true,
+        banned: true,
       },
     });
   }

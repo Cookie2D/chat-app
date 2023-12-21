@@ -2,7 +2,6 @@ import { UserRepository } from './repostitories/user.repository';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Prisma, User } from '@prisma/client';
-import { excludeFromObject } from 'src/utils/exclude';
 
 @Injectable()
 export class UserService {
@@ -23,10 +22,8 @@ export class UserService {
     return this.userRepository.findOneByName(name);
   }
 
-  async findOneById(id: number): Promise<User> {
-    const user = await this.userRepository.findOneById(id);
-
-    return excludeFromObject(user, 'password');
+  async findOneById(id: number): Promise<Omit<User, 'password'>> {
+    return await this.userRepository.findOneById(id);
   }
 
   remove(id: number): Promise<User> {
