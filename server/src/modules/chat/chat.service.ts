@@ -1,4 +1,4 @@
-import { Chat } from '@prisma/client';
+import { Chat, Message } from '@prisma/client';
 import { ChatRepository } from './chat.repository';
 import { Injectable } from '@nestjs/common';
 import { ChatWithRelations } from 'src/types/chat.type';
@@ -17,5 +17,13 @@ export class ChatService {
 
   getChatInfo(): Promise<Chat> {
     return this.chatRepository.getOneChat();
+  }
+
+  createMessage(message: string, userId: number, chatId: number) {
+    return this.chatRepository.createOneMessage(message, userId, chatId);
+  }
+
+  getLastMessageByUser(userId: number): Promise<Message> {
+    return this.chatRepository.getLastMessageByUser(userId);
   }
 }

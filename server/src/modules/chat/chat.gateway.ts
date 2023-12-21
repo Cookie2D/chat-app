@@ -1,4 +1,3 @@
-import { MessageService } from './../message/message.service';
 import { ChatService } from './chat.service';
 import { UserService } from './../user/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -33,7 +32,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly chatService: ChatService,
-    private readonly messageService: MessageService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -108,7 +106,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    const lastMessage = await this.messageService.getLastMessageByUser(
+    const lastMessage = await this.chatService.getLastMessageByUser(
       client.data.user.id,
     );
 
@@ -121,7 +119,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
     }
 
-    const message = await this.messageService.createMessage(
+    const message = await this.chatService.createMessage(
       body.message,
       client.data.user.id,
       body.chatId,

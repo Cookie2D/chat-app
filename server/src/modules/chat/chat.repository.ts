@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/core/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { Chat } from '@prisma/client';
+import { Chat, Message } from '@prisma/client';
 import { ChatWithRelations } from 'src/types/chat.type';
 
 @Injectable()
@@ -110,6 +110,59 @@ export class ChatRepository {
             user: true,
           },
         },
+      },
+    });
+  }
+
+  async createOneMessage(
+    message: string,
+    userId: number,
+    chatId: number,
+  ): Promise<Message> {
+    return await this.prismaService.message.create({
+      data: {
+        message,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        chat: {
+          connect: {
+            id: chatId,
+          },
+        },
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            color: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getMessagesByChat(chatId: number): Promise<Message[]> {
+    return await this.prismaService.message.findMany({
+      where: {
+        chat: {
+          id: chatId,
+        },
+      },
+    });
+  }
+
+  async getLastMessageByUser(userId: number): Promise<Message> {
+    return await this.prismaService.message.findFirst({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
