@@ -6,6 +6,12 @@ import { Prisma, User } from '@prisma/client';
 import { messages } from 'src/const/messages';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_SECRET,
+);
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +34,31 @@ export class AuthController {
       throw new BadRequestException(messages.INVALID_CREDENTIALS);
     }
 
+    return await this.signIn(existingUser);
+  }
+
+  @Post('google')
+  async googleAuthRedirect(@Body() body: { token: string }) {
+    if (!body.token) {
+      return 'No user from google';
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: body.token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const user = ticket.getPayload();
+
+    const existingUser = await this.userService.findOneByName(user.email);
+
+    if (!existingUser) {
+      const createdUser = await this.userService.create({
+        name: user.email,
+        email: user.email,
+      });
+      return await this.signIn(createdUser);
+    }
     return await this.signIn(existingUser);
   }
 
