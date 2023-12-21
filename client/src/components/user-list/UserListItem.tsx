@@ -6,6 +6,8 @@ import {
   ListItemText,
   IconButton,
   Typography,
+  useMediaQuery,
+  Box,
 } from "@mui/material";
 import { BlockOutlined, VolumeUpSharp, VolumeOffSharp } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
@@ -22,18 +24,28 @@ interface UserListItemProps {
 const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, muteUser }) => {
   const authUser = useAppSelector(selectAuth);
   const showButtons = authUser.role === 1 && authUser.id !== user.id;
+  const isSmallScreen = useMediaQuery("(max-width: 800px)");
 
   return (
-    <ListItem key={user.id}>
-      <ListItemAvatar>
-        <Avatar sx={{ bgcolor: user.color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
-      </ListItemAvatar>
-      <ListItemText
-        primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
-        secondary={
-          <Typography sx={{ color: status === "Online" ? "green" : "red" }}>{status}</Typography>
-        }
-      />
+    <Box
+      sx={{
+        display: isSmallScreen ? "block" : "flex",
+        textAlign: "center",
+        borderBottom: "1px solid #e0e0e0",
+      }}
+    >
+      <ListItem key={user.id}>
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: user.color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
+        </ListItemAvatar>
+        <ListItemText
+          primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
+          secondary={
+            <Typography sx={{ color: status === "Online" ? "green" : "red" }}>{status}</Typography>
+          }
+        />
+      </ListItem>
+
       {showButtons && (
         <>
           <IconButton
@@ -54,7 +66,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
           </IconButton>
         </>
       )}
-    </ListItem>
+    </Box>
   );
 };
 
