@@ -35,6 +35,14 @@ const useSocket = () => {
     dispatch(setUsers(res));
   };
 
+  const muteUser = (userId: number) => {
+    socket?.emit("muteUser", userId);
+  };
+
+  const banUser = (userId: number) => {
+    socket?.emit("banUser", userId);
+  };
+
   const handleLogout = () => {
     socket?.disconnect();
     localStorage.removeItem("user");
@@ -71,6 +79,8 @@ const useSocket = () => {
   return {
     handleLogout,
     sendMessage,
+    muteUser,
+    banUser,
   };
 };
 

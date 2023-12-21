@@ -5,7 +5,7 @@ import { RootState } from "../index";
 export interface AuthState {
   id: number | null;
   name: string | null;
-  role: string | null;
+  role: number | null;
   token: string | null;
   color: string | null;
 }

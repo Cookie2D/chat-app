@@ -1,25 +1,23 @@
-import {
-  InputBase,
-  InputAdornment,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  Avatar,
-  ListItemText,
-  Typography,
-} from "@mui/material";
-
-import { BlockOutlined, Search, VolumeOffSharp, VolumeUpSharp } from "@mui/icons-material";
+import React from "react";
+import { InputBase, InputAdornment, IconButton, List } from "@mui/material";
+import { Search } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
 import { selectOnlineUsers, selectUsers } from "../../store/slices/chatSlice";
+import { selectAuth } from "../../store/slices/authSlice";
+import UserListItem from "./UserListItem";
 
-export default function UserList() {
+interface UserListProps {
+  muteUser: (userId: number) => void;
+  banUser: (userId: number) => void;
+}
+
+const UserList: React.FC<UserListProps> = ({ muteUser, banUser }) => {
   const onlineUsers = useAppSelector(selectOnlineUsers);
   const users = useAppSelector(selectUsers);
+  const authUser = useAppSelector(selectAuth);
 
   const offlineUsers = users.filter(
-    (user) => !onlineUsers.find((onlineUser) => onlineUser.id === user.id)
+    (user) => authUser.role === 1 && !onlineUsers.find((onlineUser) => onlineUser.id === user.id)
   );
 
   return (
@@ -39,41 +37,28 @@ export default function UserList() {
       </div>
       <List>
         {onlineUsers.map((user) => (
-          <ListItem key={user.id}>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: user.color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
-              secondary={<Typography sx={{ color: "green" }}>Online</Typography>}
-            />
-            <IconButton>
-              <VolumeUpSharp />
-            </IconButton>
-            <IconButton>
-              <BlockOutlined />
-            </IconButton>
-          </ListItem>
+          <UserListItem
+            key={user.id}
+            muteUser={muteUser}
+            banUser={banUser}
+            user={user}
+            status="Online"
+          />
         ))}
 
-        {offlineUsers.map((user) => (
-          <ListItem key={user.id}>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: user.color }}>{user.name.charAt(0).toUpperCase()}</Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={<Typography sx={{ color: user.color }}>{user.name}</Typography>}
-              secondary={<Typography sx={{ color: "red" }}>Offline</Typography>}
+        {authUser.role === 1 &&
+          offlineUsers.map((user) => (
+            <UserListItem
+              key={user.id}
+              muteUser={muteUser}
+              banUser={banUser}
+              user={user}
+              status="Offline"
             />
-            <IconButton>
-              <VolumeUpSharp />
-            </IconButton>
-            <IconButton>
-              <BlockOutlined />
-            </IconButton>
-          </ListItem>
-        ))}
+          ))}
       </List>
     </div>
   );
-}
+};
+
+export default UserList;
