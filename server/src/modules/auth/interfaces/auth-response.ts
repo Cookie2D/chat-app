@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
 export interface AuthenticationResponse {
-  user: User;
+  user: Partial<User>;
   access_token: string;
 }
