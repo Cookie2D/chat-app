@@ -71,8 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       return {
         chatId: connectedChat.id,
-        // users: connectedChat.users,
-        messages: connectedChat.messages.reverse(),
+        messages: [],
       };
     }
 
@@ -80,11 +79,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       chat.id,
       userId,
     );
-    // console.log(connectedChat.users);
 
     return {
       chatId: connectedChat?.id,
-      // users: connectedChat.users,
       messages: connectedChat.messages.reverse(),
     };
   }
