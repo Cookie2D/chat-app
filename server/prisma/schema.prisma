@@ -28,6 +28,9 @@ model User {
   chat UserOnChat[]
   messages Message[]
   color String?
+  
+  muted Boolean @default(false)
+  banned Boolean @default(false) 
 
   @@index([roleId], map: "User_roleId_fkey")
 }
@@ -43,9 +46,6 @@ model UserOnChat {
   userId Int
   chat Chat @relation(fields: [chatId], references: [id])
   chatId Int
-
-  muted Boolean @default(false)
-  banned Boolean @default(false) 
 
   @@id([userId])
 }
