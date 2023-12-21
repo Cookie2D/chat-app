@@ -91,6 +91,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: any,
     @ConnectedSocket() client: Socket,
   ) {
+    const user = await this.userService.findOneById(client.data.user.id);
+
+    if (user.muted) {
+      throw new BadGatewayException('You have been muted by the administrator');
+    }
+
     if (body.message.length > 200) {
       throw new BadGatewayException(
         'Message should be no longer than 200 symbols',
@@ -155,6 +161,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.emitGetAllUsers(client);
   }
+
+  @SubscribeMessage('muteUser')
+  async muteUser(
+    @MessageBody() userId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (client.data.user.roleId !== 1) {
+      throw new BadGatewayException('Invalid permissions');
+    }
+
+    if (client.data.user.id === userId) {
+      throw new BadGatewayException('Cannot perform this action');
+    }
+
+    const user = await this.userService.findOneById(userId);
+
+    await this.userService.updateOne(userId, {
+      muted: !user.muted,
+    });
+
+    await this.emitGetAllUsers(client);
+  }
+
   private async authenticateUser(token: string): Promise<User | null> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
