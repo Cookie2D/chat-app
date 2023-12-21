@@ -7,7 +7,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { BlockOutlined, VolumeUpSharp } from "@mui/icons-material";
+import { BlockOutlined, VolumeUpSharp, VolumeOffSharp } from "@mui/icons-material";
 import { useAppSelector } from "../../store/hooks";
 import { selectAuth } from "../../store/slices/authSlice";
 import { User } from "../../types/user.types";
@@ -42,7 +42,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, status, banUser, mute
               muteUser(user.id);
             }}
           >
-            <VolumeUpSharp />
+            {user.muted ? <VolumeOffSharp /> : <VolumeUpSharp />}
           </IconButton>
           <IconButton
             color={user.banned ? "error" : "primary"}
