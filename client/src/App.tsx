@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { useEffect } from "react";
 import { selectAuth, setUser } from "./store/slices/authSlice";
 import ProtectedRoute from "./components/private-route/PrivateRoute";
+import { Container } from "@mui/material";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -16,6 +17,10 @@ function App() {
       dispatch(setUser(localstorageUser));
     }
   }, [dispatch, user]);
+
+  if (user.token === null) {
+    return <Container>Loading...</Container>;
+  }
 
   return (
     <Routes>
