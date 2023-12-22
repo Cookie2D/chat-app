@@ -34,6 +34,10 @@ export class AuthController {
       return await this.signIn(user);
     }
 
+    if (existingUser.banned) {
+      throw new UnauthorizedException('You are banned from this server');
+    }
+
     const isMatch = await bcrypt.compare(body.password, existingUser.password);
 
     if (!isMatch) {
