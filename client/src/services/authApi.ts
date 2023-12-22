@@ -14,7 +14,16 @@ export const authApi = createApi({
         };
       },
     }),
+    googleAuthenticateUser: builder.mutation({
+      query: (body: { token: string | undefined }) => {
+        return {
+          url: "/google",
+          method: "post",
+          body,
+        };
+      },
+    }),
   }),
 });
 
-export const { useAuthenticateUserMutation } = authApi;
+export const { useAuthenticateUserMutation, useGoogleAuthenticateUserMutation } = authApi;
