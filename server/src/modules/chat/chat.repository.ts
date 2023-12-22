@@ -60,12 +60,21 @@ export class ChatRepository {
       return existingChat;
     }
 
-    await this.prismaService.userOnChat.create({
-      data: {
+    const existingUserOnChat = await this.prismaService.userOnChat.findUnique({
+      where: {
         userId,
         chatId,
       },
     });
+
+    if (!existingUserOnChat) {
+      await this.prismaService.userOnChat.create({
+        data: {
+          userId,
+          chatId,
+        },
+      });
+    }
 
     const updatedChat = await this.prismaService.chat.findUnique({
       where: {
