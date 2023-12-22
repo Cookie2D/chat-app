@@ -93,7 +93,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const user = await this.userService.findOneById(client.data.user.id);
+    const user = client.data.user;
 
     if (user.muted) {
       throw new WsException('You have been muted by the administrator');
@@ -236,8 +236,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     for (const connection of onlineConnections) {
       if (!connection.data.user) continue;
-
-      connection.emit('getOnlineUsers', onlineUsers);
 
       if (connection.data.user.roleId === 1) {
         this.emitGetAllUsers(connection);
