@@ -1,5 +1,11 @@
 import { UserService } from './../user/user.service';
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthorizeDto } from './dto/authorize.dto';
 import { AuthenticationResponse } from './interfaces/auth-response';
 import { Prisma, User } from '@prisma/client';
@@ -40,7 +46,7 @@ export class AuthController {
   @Post('google')
   async googleAuthRedirect(@Body() body: { token: string }) {
     if (!body.token) {
-      return 'No user from google';
+      throw new UnauthorizedException('Bad credentials');
     }
 
     const ticket = await client.verifyIdToken({
